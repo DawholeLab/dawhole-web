@@ -80,7 +80,9 @@
   @media(prefers-reduced-motion:reduce){.eco-card{opacity:1;transform:none}}
 
   /* WHAT WE DO */
-  .wwd{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--ink)}
+  .wwd{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--ink);position:relative}
+  .wwd::before{content:"";position:absolute;inset:0;background:url("assets/topo.png") repeat;background-size:520px;opacity:.06;pointer-events:none}
+  .wwd .wrap{position:relative;z-index:1}
   .wwd-list{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 2.5rem;list-style:none;margin-top:1.5rem}
   .wwd-list li{padding:1.1rem 0;border-bottom:1px solid var(--line);font-size:.86rem;letter-spacing:.14em;text-transform:uppercase;font-weight:500;color:var(--silver)}
   @media(max-width:760px){.wwd-list{grid-template-columns:1fr}}
@@ -190,6 +192,7 @@
       </div>
       <div class="eco-card">
         <p class="by">by Dawhole</p>
+        <img src="assets/iceberg.png" alt="" aria-hidden="true" style="position:absolute;right:-1rem;top:50%;transform:translateY(-52%);height:150%;opacity:.16;pointer-events:none">
         <h3>SocialTrauma</h3>
         <p>Naivety is dangerous when it comes to research, strategy and knowledge of human systems. Pain, tragedy, catastrophe, threats, fear, anxiety, anguish, rage and delirium are components of social life that research models and offices usually do not know what to do with. The healthy thing is not to look there: social, political and private pacts are based almost entirely on a promise of happiness and prosperity. But someone has to look into the shadow, without prejudice, and understand how the densest collective energies are managed. We believe, with humility, that we have helped manage terrible crises and helped governments and companies use their power and resources to contribute to restoring the mental health of millions of people struck daily by the mallet of violence, precarity and corruption.</p>
         <a class="more" href="#contact">Learn more →</a>
