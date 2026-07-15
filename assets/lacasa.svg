@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 300" fill="none">
+  <!-- hoja trasera -->
+  <polygon points="134,44 182,62 182,232 134,250" fill="#8fa3bd" opacity=".45"/>
+  <!-- hoja media -->
+  <polygon points="104,38 152,56 152,238 104,256" fill="#8fa3bd" opacity=".65"/>
+  <!-- portada con puerta recortada -->
+  <path fill-rule="evenodd" fill="#8fa3bd" d="M42 30 L122 52 L122 260 L42 238 Z M64 132 L94 140 L94 236 L64 228 Z"/>
+  <!-- hoja de puerta abierta -->
+  <polygon points="64,132 36,118 36,214 64,228" fill="#8fa3bd" opacity=".7"/>
+  <!-- sombra -->
+  <polygon points="122,260 198,232 224,258 148,288" fill="#8fa3bd" opacity=".22"/>
+</svg>
