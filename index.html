@@ -42,9 +42,16 @@
   /* HERO */
   header{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:6rem 1.5rem 4rem;overflow:hidden}
   .video-bg{position:absolute;inset:0;z-index:0;overflow:hidden;background:var(--ink)}
-  .video-bg iframe{position:absolute;top:50%;left:50%;width:177.78vh;min-width:100vw;height:56.25vw;min-height:100vh;transform:translate(-50%,-50%);opacity:1;pointer-events:none}
+  .video-bg canvas{position:absolute;inset:0;width:100%;height:100%}
   .video-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,29,41,.25) 0%,rgba(22,29,41,0) 45%,var(--navy) 100%);z-index:1}
   .hero-in{text-shadow:0 2px 24px rgba(0,0,0,.6)}
+
+  /* Tipografía cinética del hero */
+  .hero-tag .kw{display:inline-block;opacity:0;transform:translateY(.6em);transition:opacity .6s ease,transform .6s ease}
+  .hero-tag.play .kw{opacity:1;transform:none}
+  .wordmark,.hero-sub{opacity:0;transform:translateY(14px);transition:opacity .9s ease .1s,transform .9s ease .1s}
+  .hero-ready .wordmark,.hero-ready .hero-sub{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.hero-tag .kw,.wordmark,.hero-sub{opacity:1!important;transform:none!important;transition:none!important}}
   header .hero-in{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center}
 
   .power-logo{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:1.2rem}
@@ -59,16 +66,18 @@
   .manifesto p.big{font-size:clamp(1.15rem,2.6vw,1.6rem);max-width:46rem;margin:0 auto;color:var(--silver)}
   .manifesto p.big b{color:#fff;font-weight:700}
 
-  /* ECOSYSTEM */
-  .eco-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:2rem}
-  .eco-card{background:var(--navy2);border:1px solid var(--line);padding:2rem;display:flex;flex-direction:column;transition:transform .25s,border-color .25s}
-  .eco-card:hover{transform:translateY(-4px);border-color:var(--accent)}
+  /* ECOSYSTEM — capítulos */
+  .eco-grid{display:flex;flex-direction:column;gap:3.2rem;margin-top:2.5rem;max-width:56rem;counter-reset:eco}
+  .eco-card{position:relative;background:transparent;border-left:2px solid rgba(143,163,189,.35);padding:0 0 0 2.2rem;display:flex;flex-direction:column;counter-increment:eco;transition:border-color .4s;opacity:0;transform:translateY(30px)}
+  .eco-card.visible{opacity:1;transform:none;transition:opacity .8s ease,transform .8s ease,border-color .4s}
+  .eco-card:hover{border-color:var(--accent)}
+  .eco-card::before{content:counter(eco,decimal-leading-zero);position:absolute;left:-.6rem;top:-2.4rem;font-size:4.6rem;font-weight:900;color:rgba(143,163,189,.12);line-height:1;letter-spacing:.02em;pointer-events:none}
   .eco-card .by{font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);font-weight:500;margin-bottom:.7rem}
-  .eco-card h3{font-size:1.15rem;font-weight:700;letter-spacing:.03em;margin-bottom:.7rem}
-  .eco-card p{font-size:.9rem;color:var(--silver);flex:1}
+  .eco-card h3{font-size:1.5rem;font-weight:700;letter-spacing:.03em;margin-bottom:.8rem}
+  .eco-card p{font-size:.95rem;color:var(--silver);flex:1;max-width:48rem}
   .eco-card a.more{margin-top:1.3rem;font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:#fff;text-decoration:none;font-weight:700}
   .eco-card a.more:hover{color:var(--accent)}
-  @media(max-width:760px){.eco-grid{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){.eco-card{opacity:1;transform:none}}
 
   /* WHAT WE DO */
   .wwd{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--ink)}
@@ -135,7 +144,7 @@
 
 <header id="top">
   <div class="video-bg">
-    <iframe src="https://player.vimeo.com/video/672350439?h=b948aff67f&autoplay=1&loop=1&autopause=0&muted=1&title=0&byline=0&portrait=0&controls=0&background=1" frameborder="0" allow="autoplay; fullscreen" title="Dawhole"></iframe>
+    <canvas id="particles" aria-hidden="true"></canvas>
   </div>
   <div class="video-veil"></div>
   <div class="hero-in">
@@ -399,11 +408,83 @@
 
 <script>
 (function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Revelado de secciones y capítulos del ecosistema */
   document.querySelectorAll('main section .wrap').forEach(function(el){ el.classList.add('reveal'); });
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target);} });
   },{threshold:.1});
-  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+  document.querySelectorAll('.reveal, .eco-card').forEach(function(el){ io.observe(el); });
+
+  /* Tipografía cinética del hero */
+  var tag = document.querySelector('.hero-tag');
+  if(tag){
+    var words = tag.textContent.trim().split(/\s+/);
+    tag.innerHTML = words.map(function(w,i){
+      return '<span class="kw" style="transition-delay:'+(0.35+i*0.12)+'s">'+w+'</span>';
+    }).join(' ');
+    requestAnimationFrame(function(){
+      document.querySelector('header').classList.add('hero-ready');
+      tag.classList.add('play');
+    });
+  }
+
+  /* Partículas interactivas — sistema conversacional */
+  var cv = document.getElementById('particles');
+  if(!cv) return;
+  var ctx = cv.getContext('2d'), W, H, pts = [], mouse = {x:-9999, y:-9999};
+  function resize(){
+    W = cv.width = cv.offsetWidth * devicePixelRatio;
+    H = cv.height = cv.offsetHeight * devicePixelRatio;
+  }
+  resize(); addEventListener('resize', resize);
+  var isMobile = matchMedia('(max-width:760px)').matches;
+  var N = isMobile ? 55 : 110;
+  for(var i=0;i<N;i++){
+    pts.push({x:Math.random()*1, y:Math.random()*1,
+      vx:(Math.random()-.5)*.0006, vy:(Math.random()-.5)*.0006,
+      r: 1 + Math.random()*1.8});
+  }
+  var hero = document.querySelector('header');
+  hero.addEventListener('mousemove', function(e){
+    var b = cv.getBoundingClientRect();
+    mouse.x = (e.clientX - b.left)/b.width; mouse.y = (e.clientY - b.top)/b.height;
+  });
+  hero.addEventListener('mouseleave', function(){ mouse.x = -9999; mouse.y = -9999; });
+  var LINK = isMobile ? .11 : .09, MOUSE_LINK = .18;
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<N;i++){
+      var p = pts[i];
+      /* atracción suave hacia el cursor */
+      var dxm = mouse.x-p.x, dym = mouse.y-p.y, dm = Math.sqrt(dxm*dxm+dym*dym);
+      if(dm < .22){ p.vx += dxm*.000012/(dm+.02); p.vy += dym*.000012/(dm+.02); }
+      p.vx *= .995; p.vy *= .995;
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0||p.x>1) p.vx*=-1; if(p.y<0||p.y>1) p.vy*=-1;
+    }
+    ctx.lineWidth = 1;
+    for(var i=0;i<N;i++){
+      for(var j=i+1;j<N;j++){
+        var a=pts[i], b=pts[j], dx=a.x-b.x, dy=a.y-b.y, d=Math.sqrt(dx*dx+dy*dy);
+        if(d<LINK){
+          ctx.strokeStyle='rgba(143,163,189,'+(0.35*(1-d/LINK)).toFixed(3)+')';
+          ctx.beginPath(); ctx.moveTo(a.x*W,a.y*H); ctx.lineTo(b.x*W,b.y*H); ctx.stroke();
+        }
+      }
+      /* conexión con el cursor */
+      var p=pts[i], dxm=mouse.x-p.x, dym=mouse.y-p.y, dm=Math.sqrt(dxm*dxm+dym*dym);
+      if(dm<MOUSE_LINK){
+        ctx.strokeStyle='rgba(215,225,240,'+(0.5*(1-dm/MOUSE_LINK)).toFixed(3)+')';
+        ctx.beginPath(); ctx.moveTo(p.x*W,p.y*H); ctx.lineTo(mouse.x*W,mouse.y*H); ctx.stroke();
+      }
+      ctx.fillStyle='rgba(174,180,189,.85)';
+      ctx.beginPath(); ctx.arc(p.x*W,p.y*H,p.r*devicePixelRatio,0,6.283); ctx.fill();
+    }
+    if(!reduce) requestAnimationFrame(frame);
+  }
+  frame(); /* con reduced-motion queda un fotograma estático */
 })();
 </script>
 
